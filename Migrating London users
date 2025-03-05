@@ -1,0 +1,13 @@
+$OUName="London"
+$DomainDN="DC=Adatum,DC=com"
+$OUPath="OU=$OUName,$DomainDN"
+$GroupName="London Users"
+if(-not (Get-ADGroup -Filter "Name -eq '$GroupName'" -ErrorAction SilentlyContinue)){
+    New-ADGroup -Name $GroupName -Path $OUPath -GroupCategory Security -GroupScope Global -Description "London Users Group" -ErrorAction Stop
+        Write-Host "Created group '$GroupName' in '$OUPath'."
+        }
+        Get-ADUser -Filter "City -eq 'London'" -Properties City | ForEach-Object {
+            Move-ADObject -Identity $_.DistinguishedName -TargetPath $OUPath -ErrorAction SilentlyContinue
+                Add-ADGroupMember -Identity $GroupName -Members $_ -ErrorAction SilentlyContinue
+                    Write-Host "User '$($_.SamAccountName)' has been moved to '$OUPath' and added to '$GroupName'."
+                    }
